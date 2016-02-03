@@ -1,0 +1,48 @@
+#include <Smartcar.h>
+
+Car car;
+Odometer encoderLeft, encoderRight;
+Gyroscope gyro;
+
+void setup() {
+  Serial3.begin(9600);
+  Serial3.setTimeout(200);
+  gyro.attach();
+  encoderLeft.attach(2);
+  encoderRight.attach(3);
+  encoderLeft.begin();
+  encoderRight.begin();
+  gyro.begin();
+  car.begin(encoderLeft, encoderRight, gyro);
+  
+}
+
+void loop() {
+  handleInput();
+}
+
+void handleInput() { //handle serial input if there is any
+  if (Serial3.available()) {
+    String input = Serial3.readStringUntil('\n');
+    if (input.startsWith("w")) {
+      car.setSpeed(100);
+      car.go(100);
+      car.setSpeed(0);
+    }else if (input.startsWith("s")){
+      car.setSpeed(50);
+      car.rotate(140);
+      car.setSpeed(0);
+           
+    }else if(input.startsWith("a")){
+      car.setSpeed(50);
+      car.rotate(-75);
+      car.setSpeed(0);
+    }else if(input.startsWith("d")){
+      car.setSpeed(50);
+      car.rotate(75);
+      car.setSpeed(0);
+    }
+  }
+}boolean frontIsClear(){
+  
+}
