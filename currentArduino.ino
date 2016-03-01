@@ -25,7 +25,6 @@ void setup() {
   ultrasonicSensor2.attach(6,5);
   in=0;
   speed=0;
-  //
   front=0;
   back=0;
   angle=0;
