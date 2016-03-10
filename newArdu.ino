@@ -37,17 +37,23 @@ void loop() {
   if (Serial3.available()) {
     in = Serial3.read();
     handleInput();
-
   }
+   currentSpeed = (encoderRight.getSpeed() + encoderLeft.getSpeed())/2;
+   
+  Serial3.print("s");
+  if(currentSpeed < 0.2){
+    currentSpeed = 0;
+    Serial3.println(currentSpeed);
+  }else{
+  Serial3.println(currentSpeed);
+  }
+  dis = encoderRight.getDistance();
+  Serial3.print("d");
+  Serial3.println(dis / 100);
 }
 
 void handleInput() { //handle serial input if there is any
-  currentSpeed = encoderRight.getSpeed();
-  Serial3.print("s");
-  Serial3.println(currentSpeed);
-  dis = encoderRight.getDistance();
-  Serial3.print("d");
-  Serial3.println(dis/100);
+  
 
   //Commands from android
   switch (in) {
