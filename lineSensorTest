@@ -1,0 +1,7 @@
+void setup() {
+ Serial.begin(9600);
+}
+//A small code to read from the line following sensors, use it to test the sensors
+void loop() {
+  Serial.println(analogRead(A1));//See what analog pin is connected to your output pin of the sensor you're testing...ex..A1,A2,A3...ETC
+}
