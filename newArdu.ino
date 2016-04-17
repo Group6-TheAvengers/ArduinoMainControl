@@ -11,6 +11,8 @@ int speed, front, back, angle;
 char in;
 float dis;
 float currentSpeed;
+// Used for the line following
+boolean follow;
 
 void setup() {
   Serial3.begin(9600);
@@ -30,6 +32,7 @@ void setup() {
   angle = 0;
   dis = 0;
   currentSpeed = 0;
+  boolean follow = false;
 }
 
 
@@ -38,6 +41,11 @@ void loop() {
     in = Serial3.read();
     handleInput();
   }
+  
+  if(follow == true) {
+     FollowLine();
+  }
+  
    currentSpeed = (encoderRight.getSpeed() + encoderLeft.getSpeed())/2;
    
   Serial3.print("s");
@@ -108,40 +116,15 @@ void handleInput() { //handle serial input if there is any
       car.setSpeed(0);
       car.setAngle(0);
       break;
+    case 'q':
+      follow = true;
   }
-}
-
-boolean frontIsClear() {
-  front =  ultrasonicSensor2.getDistance();
-  if (front > 20) // change the distance here (since the ultra sonic is far from being ideal)
-    return true;
-  if (front == 0)
-    return true;
-
-  return false;
-}
-
-#include <Smartcar.h>
-
-Car car;
-Odometer encoderLeft, encoderRight;
-Gyroscope gyro;
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  encoderLeft.attach(2);
-  encoderRight.attach(3);
-  encoderLeft.begin();
-  encoderRight.begin();
-  gyro.attach();
-  gyro.begin();
-  car.begin(encoderLeft,encoderRight,gyro);
 }
 
 void FollowLine() {
   while(true){
    in = Serial3.read();
-   if(in=='d')
+   if(in=='m')
    break;
   if(greatest().equals("CENTER"))
   car.setMotorSpeed(50,50);
@@ -156,6 +139,7 @@ void FollowLine() {
   delay(50);
   }
 }
+
 String greatest(){
   int a=analogRead(A11),b=analogRead(A8),c=analogRead(A9),d=analogRead(A10), e=analogRead(A12);
   if(a>b && a>c && a>d && a>e)
