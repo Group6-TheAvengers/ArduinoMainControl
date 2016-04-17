@@ -120,3 +120,52 @@ boolean frontIsClear() {
 
   return false;
 }
+
+#include <Smartcar.h>
+
+Car car;
+Odometer encoderLeft, encoderRight;
+Gyroscope gyro;
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  encoderLeft.attach(2);
+  encoderRight.attach(3);
+  encoderLeft.begin();
+  encoderRight.begin();
+  gyro.attach();
+  gyro.begin();
+  car.begin(encoderLeft,encoderRight,gyro);
+}
+
+void FollowLine() {
+  while(true){
+   in = Serial3.read();
+   if(in=='d')
+   break;
+  if(greatest().equals("CENTER"))
+  car.setMotorSpeed(50,50);
+  if(greatest().equals("LEFT IN"))
+  car.setMotorSpeed(0,50);
+  if(greatest().equals("LEFT OUT"))
+  car.setMotorSpeed(0,50);
+  if(greatest().equals("RIGHT IN"))
+  car.setMotorSpeed(50,0);
+  if(greatest().equals("RIGHT OUT"))
+  car.setMotorSpeed(50,0);
+  delay(50);
+  }
+}
+String greatest(){
+  int a=analogRead(A11),b=analogRead(A8),c=analogRead(A9),d=analogRead(A10), e=analogRead(A12);
+  if(a>b && a>c && a>d && a>e)
+  return "LEFT OUT";
+  if(b>a && b>c && b>d && b>e)
+  return "CENTER";
+  if(c>a && c>b && c>d && c>e)
+  return "RIGHT IN";
+  if(d>a && d>b && d>c && d>e)
+  return "RIGHT OUT";
+  return "LEFT IN";
+}
+
