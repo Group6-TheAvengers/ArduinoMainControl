@@ -11,7 +11,7 @@ int speed, front, back, angle;
 char in;
 float dis;
 float currentSpeed;
-int right, center;
+int right, lef;
 boolean follow;
 
 void setup() {
@@ -32,7 +32,7 @@ void setup() {
   angle = 0;
   dis = 0;
   currentSpeed = 0;
-  right=0, center=0;// Line sensors give higher values for darker colours
+  right=70, left=70;// Line sensors give higher values for darker colours
   follow = false;
 }
 
@@ -133,20 +133,50 @@ boolean frontIsClear() {
   return false;
 }
 
-void updateValues(){//P.S I forgot the correct pins assosiated with the sensors
-right = analogRead(A10);//put the correct pin here
-center = analogRead(A8);//put the correct pin here  
+/*
+ * return the sensor that's detecting the line
+ */
+String greatest(){
+  int a=analogRead(A11),b=analogRead(A8),c=analogRead(A9),d=analogRead(A10), e=analogRead(A12);
+  if(a>b && a>c && a>d && a>e)
+  return "LEFT OUT";
+  if(b>a && b>c && b>d && b>e)
+  return "CENTER";
+  if(c>a && c>b && c>d && c>e)
+  return "RIGHT IN";
+  if(d>a && d>b && d>c && d>e)
+  return "RIGHT OUT";
+  return "LEFT IN";
 }
 
+/*
+ * A simple sketch to follow a line...if the line is on the CENTER the car will just move forward 
+ * if it's below LEFTIN or RIGHTIN the car will turn slighty towards the oppsite direction and if the line stays there the turning angle will increase 
+ * the LEFTOUT and RIGHTOUT are more like safty triggers if the line goes below them the car will rotate slowly untill we get back LEFTIN/RIGHTIN
+ */
 void linefollowing() {
-  updateValues();// read the values from the sensors
-
-if(left>=center && left>right){//if the line is below the left sensor (it could be below both the left and the center one)
-  car.setMotorSpeed(0,50);//rotate left
-}else if(right>=center && left<right){//Same case but on the oppsite direction (right)
-  car.setMotorSpeed(50,0);
-}else if(center>left && center>right){//if the center sensor is the only one above the line just advance forward 
-  car.setMotorSpeed(50,50);// go ahead
+while(true){   
+if(greatest().equals("CENTER")){
+  car.setMotorSpeed(100,100);
+  left=50;
+  right=50;
+  }
+  if(greatest().equals("LEFT IN")){
+    left=left-20;
+  car.setMotorSpeed(left,100);
+  }
+  if(greatest().equals("LEFT OUT")){
+    car.setMotorSpeed(0,0);
+  car.setMotorSpeed(0,30);
+  }
+  if(greatest().equals("RIGHT IN")){
+    right=right-20;
+  car.setMotorSpeed(100,right);
+  }
+  if(greatest().equals("RIGHT OUT")){
+    car.setMotorSpeed(0,0);
+  car.setMotorSpeed(30,0);
+  }
 }
 } //Otherwise if there's no black (or darker) line then just do nothing.
 
