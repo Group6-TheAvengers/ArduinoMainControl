@@ -42,7 +42,7 @@ void loop() {
   if (Serial3.available()) {
     in = Serial3.read();
     handleInput();
-    if(follow == true) {
+    while(follow == true) {
     linefollowing();
     }
   }
@@ -155,7 +155,7 @@ String greatest(){
  * the LEFTOUT and RIGHTOUT are more like safty triggers if the line goes below them the car will rotate slowly untill we get back LEFTIN/RIGHTIN
  */
 void linefollowing() {
-while(true){   
+
 if(greatest().equals("CENTER")){
   car.setMotorSpeed(100,100);
   left=50;
@@ -177,7 +177,7 @@ if(greatest().equals("CENTER")){
     car.setMotorSpeed(0,0);
   car.setMotorSpeed(30,0);
   }
-}
+
 } //Otherwise if there's no black (or darker) line then just do nothing.
 
 
