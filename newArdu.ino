@@ -134,7 +134,7 @@ void FollowLine() {
   car.setMotorSpeed(0,50);
   if(greatest().equals("RIGHT IN"))
   car.setMotorSpeed(50,0);
-  if(greatest().equals("RIGHT OUT"))
+  if(greatest().equals("RIGHT OUT"))//I wanna know who fucked the code :(
   car.setMotorSpeed(50,0);
   delay(50);
   }
