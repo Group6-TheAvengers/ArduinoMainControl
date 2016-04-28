@@ -12,6 +12,13 @@ char in;
 float dis;
 float currentSpeed;
 // Used for the line following
+const int MOTOR_MAX_SPEED=50;
+const int MOTOR_BASE_SPEED=35;
+float Kp=10,Kd=80;
+float currError=0;
+float correction=0;
+float lastError=0;
+float leftin=0,rightin=0,leftout=0,rightout=0;
 boolean follow;
 
 void setup() {
@@ -120,36 +127,31 @@ void handleInput() { //handle serial input if there is any
       follow = true;
   }
 }
-
 void FollowLine() {
-  while(true){
-   in = Serial3.read();
-   if(in=='m')
-   break;
-  if(greatest().equals("CENTER"))
-  car.setMotorSpeed(50,50);
-  if(greatest().equals("LEFT IN"))
-  car.setMotorSpeed(0,50);
-  if(greatest().equals("LEFT OUT"))
-  car.setMotorSpeed(0,50);
-  if(greatest().equals("RIGHT IN"))
-  car.setMotorSpeed(50,0);
-  if(greatest().equals("RIGHT OUT"))//I wanna know who fucked the code :(
-  car.setMotorSpeed(50,0);
-  delay(50);
-  }
+  currError = Error();
+  float correction =  Kp * currError + Kd * (currError - lastError);
+  lastError = currError;
+  float rightMotorSpeed = MOTOR_BASE_SPEED + correction;
+  float leftMotorSpeed = MOTOR_BASE_SPEED - correction;
+  if (rightMotorSpeed > MOTOR_MAX_SPEED ) rightMotorSpeed = MOTOR_MAX_SPEED; // prevent the motor from going beyond max speed
+  if (leftMotorSpeed > MOTOR_MAX_SPEED ) leftMotorSpeed = MOTOR_MAX_SPEED; // prevent the motor from going beyond max speed
+  if(rightMotorSpeed<0) rightMotorSpeed=0;
+  if(leftMotorSpeed<0)leftMotorSpeed=0;
+  car.setMotorSpeed(leftMotorSpeed,rightMotorSpeed); 
+  delay(6); 
 }
-
-String greatest(){
-  int a=analogRead(A11),b=analogRead(A8),c=analogRead(A9),d=analogRead(A10), e=analogRead(A12);
+float Error(){
+  float a=analogRead(A11),b=analogRead(A8),c=analogRead(A9),d=analogRead(A10), e=analogRead(A12);
   if(a>b && a>c && a>d && a>e)
-  return "LEFT OUT";
-  if(b>a && b>c && b>d && b>e)
-  return "CENTER";
+  return leftout=(leftout +2.7);
+  
+  if(b>a && b>c && b>d && b>e){
+  return 0;//reset all
+  leftin=0,rightin=0,leftout=0,rightout=0;
+  }
   if(c>a && c>b && c>d && c>e)
-  return "RIGHT IN";
+  return rightin=rightin-1.5;
   if(d>a && d>b && d>c && d>e)
-  return "RIGHT OUT";
-  return "LEFT IN";
+  return rightout=(rightout -2.7);
+  return leftin+=1.5;
 }
-
