@@ -2,48 +2,77 @@
 Car car;
 Odometer encoderLeft, encoderRight;
 Gyroscope gyro;
-const int MOTOR_MAX_SPEED=50;
-const int MOTOR_BASE_SPEED=35;
-float Kp=10,Kd=80;
-float currError=0;
-float correction=0;
-float lastError=0;
-float leftin=0,rightin=0,leftout=0,rightout=0;
-void setup() {
+long sensors_average;
+int sensors_sum;
+int position;
+int set_point=1990;
+int proportional, integral, derivative,last_proportional;
+int error_value;
+long sensors[] = {0, 0, 0, 0, 0};   // Array used to store 5 readings for the 5sensors.
+int Kp=5, Ki=0, Kd=50;//tuned by testing 
+int  right_speed=0, left_speed=0;
+int  max_speed=80;
+void setup(){
+  Serial.begin(9600);
   encoderLeft.attach(2);
   encoderRight.attach(3);
   encoderLeft.begin();
   encoderRight.begin();
   gyro.begin();
   car.begin(encoderLeft, encoderRight, gyro);
+  proportional=0, integral=0, derivative=0,last_proportional=0;
+  error_value=0;
 }
-
-void loop() {
-  currError = Error();
-  float correction =  Kp * currError + Kd * (currError - lastError);
-  lastError = currError;
-  float rightMotorSpeed = MOTOR_BASE_SPEED + correction;
-  float leftMotorSpeed = MOTOR_BASE_SPEED - correction;
-  if (rightMotorSpeed > MOTOR_MAX_SPEED ) rightMotorSpeed = MOTOR_MAX_SPEED; // prevent the motor from going beyond max speed
-  if (leftMotorSpeed > MOTOR_MAX_SPEED ) leftMotorSpeed = MOTOR_MAX_SPEED; // prevent the motor from going beyond max speed
-  if(rightMotorSpeed<0) rightMotorSpeed=0;
-  if(leftMotorSpeed<0)leftMotorSpeed=0;
-  car.setMotorSpeed(leftMotorSpeed,rightMotorSpeed); 
-  delay(6); 
+ 
+void loop(){
+read();//get the current position 
+pid();//get the correction vaule 
+pidTurn();//tune the correction vaule
+car.setMotorSpeed(right_speed, left_speed);//apply correction
+Serial.println(error_value);
 }
-float Error(){
-  float a=analogRead(A11),b=analogRead(A8),c=analogRead(A9),d=analogRead(A10), e=analogRead(A12);
-  if(a>b && a>c && a>d && a>e)
-  return leftout=(leftout +2.7);
-  
-  if(b>a && b>c && b>d && b>e){
-  return 0;//reset all
-  leftin=0,rightin=0,leftout=0,rightout=0;
-  }
-  if(c>a && c>b && c>d && c>e)
-  return rightin=rightin-1.5;
-  if(d>a && d>b && d>c && d>e)
-  return rightout=(rightout -2.7);
-  return leftin+=1.5;
+void read()
+{
+sensors_average = 0;
+sensors_sum = 0;
+ 
+for (int i = 0; i < 5; i++){
+if(i==0)  sensors[i] = analogRead(A11);//sensors from left to right (0,1,2,3,4)
+if(i==1)  sensors[i] = analogRead(A12);
+if(i==2)  sensors[i] = analogRead(A8);
+if(i==3)  sensors[i] = analogRead(A9);
+if(i==4)  sensors[i] = analogRead(A10);
+sensors_average += sensors[i] * i * 1000;   //Calculating the weighted mean
+sensors_sum += int(sensors[i]);}            //Calculating sum of sensor readings
 }
-
+void pid()
+{
+position = int(sensors_average / sensors_sum);
+proportional = position - set_point;
+integral = integral + proportional;
+derivative = proportional - last_proportional;
+last_proportional = proportional;
+ 
+error_value = int(proportional * Kp + integral * Ki + derivative * Kd);
+}
+void pidTurn()
+{  //Restricting the error value between +256.
+if (error_value< -256)
+{ error_value = -256;
+} 
+if (error_value> 256)
+{
+error_value = 256;
+}
+//turning the car left or right depening of the err vaule wether it's <0 or >0  
+if (error_value< 0)
+{
+right_speed = max_speed + error_value;
+left_speed = max_speed;
+}
+else
+{
+right_speed = max_speed;
+left_speed = max_speed - error_value;
+}
+}
