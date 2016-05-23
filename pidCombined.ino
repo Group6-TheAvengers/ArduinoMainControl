@@ -59,6 +59,8 @@ void loop() {
      FollowLine();
   }
   else{
+    car.setSpeed(0);
+    car.setAngle(0);
   }
   
    currentSpeed = (encoderRight.getSpeed() + encoderLeft.getSpeed())/2;
@@ -134,6 +136,9 @@ void handleInput() { //handle serial input if there is any
     case 'q':
       if(follow == false){
         follow = true;
+      }
+      else if(follow == true){
+        follow = false;
       }
       else{
         follow = false;
