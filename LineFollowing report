@@ -1,0 +1,39 @@
+                                                                  Line following 
+
+We’re using the PID algorithm together with a small algorithm to get the current position of the car.
+
+Position: 
+
+First to follow the line we’re using 5 analog line sensors and they basically consist of an trigger and echo infrared so they’ll give us an input depending on the brightness and the color of the surface below them, the darker the color the higher input value we’ll get.
+So for white surfaces the input will almost be around 900 and for black the input will be around 1000.
+to get the position I have an array of the reads of all the sensors from left to right then I calculate the average and the sum of the reads then dived the average on the sum to get the current position.
+
+PID: 
+
+PID stands for proportional, integral and derivative.
+The proportional value is proportional to our car position on the line in other words if the car is on the line we should expect a value of 0.
+The integral is the history of your proportional values since the robot started to run.
+And the derivative is the rate of the proportional value change.
+Some more key values in this algorithm are the process variable aka the error value (or the current position) and the gains (Kp,Ki,Kd).
+Now the magic of this algorithm comes when you tune the gains correctly and you can do that by testing only.
+
+The Formula:
+
+
+e(t) is the error or the proportional value (the difference between the set_point and the current position).
+∑e(t).dt is the integral value.
+de(t)/dt is the derivative value. 
+and the gains of course .
+The u(t) represent the correction value we should apply on the motor speed to go back on track.
+
+The code:
+
+we have three functions: read(), PID() and turnPID().
+And two integers right_speed and left_speed where I assign their values after I apply the PID formula.
+And the set_point value and it’s the position where the car is on the line.
+Read(): it reads the values from the sensors and get the current position.
+Pid(): we’re just getting the main values (proportional, integral and derivative) and apply the algorithm to get the correction value.
+PidTurn(): here we maintain the correction value between a small scale (-256, 256) then we assign the right_speed and left_speed variables depending on the correction value and whether it’s positive or negative (turn left or right)
+notice that we apply the correction in the void loop after applying all if these methods.
+
+
