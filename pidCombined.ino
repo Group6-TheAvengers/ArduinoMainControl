@@ -1,4 +1,3 @@
-
 #include <Smartcar.h>
 /*
    Full Serial control via bluetooth, the car will only move by rotating it after encoutering an obstacle
@@ -16,13 +15,13 @@ float currentSpeed;
 long sensors_average;
 int sensors_sum;
 int position;
-int set_point=1990;
+int set_point=2000;
 int proportional, integral, derivative,last_proportional;
 int error_value;
 long sensors[] = {0, 0, 0, 0, 0};   // Array used to store 5 readings for the 5sensors.
-int Kp=5, Ki=0, Kd=50;//tuned by testing 
+int Kp=5, Ki=0.001, Kd=50;//tuned by testing 
 int  right_speed=0, left_speed=0;
-int  max_speed=80;
+int  max_speed=90;
 boolean follow;
 
 void setup() {
@@ -55,14 +54,12 @@ void loop() {
     handleInput();
   }
   
-  if(follow == true) {
-     FollowLine();
+  if(follow)
+  {
+     followLine();//notice the execution will stop here until we send the unfollow command "Q"
+     car.setSpeed(0);//then we're stopping the car
+     car.setAngle(0);
   }
-  else{
-    car.setSpeed(0);
-    car.setAngle(0);
-  }
-  
    currentSpeed = (encoderRight.getSpeed() + encoderLeft.getSpeed())/2;
    
   Serial3.println("s");
@@ -145,12 +142,19 @@ void handleInput() { //handle serial input if there is any
       }
   }
 }
-void FollowLine() {
+void followLine() 
+{
+  while(follow)
+{
   read();//get the current position 
-pid();//get the correction vaule 
-pidTurn();//tune the correction vaule
-car.setMotorSpeed(right_speed, left_speed);//apply correction
-Serial.println(error_value);
+  pid();//get the correction vaule 
+  pidTurn();//tune the correction vaule
+  car.setMotorSpeed(right_speed, left_speed);//apply correction
+  in = Serial3.read();
+  if(in='q')
+  follow = !follow;
+  delay(3);
+}  
 }
 void read()
 {
