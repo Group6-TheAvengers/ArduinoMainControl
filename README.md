@@ -1,2 +1,2 @@
 # Control_Car
-An example sketch used to control the Arduino chip 
+A line following robot with the ability to control it from an android application
